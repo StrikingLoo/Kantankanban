@@ -1,6 +1,8 @@
 # Kantankanban 📌
 
-A Kantan CLI tool. Create boards, add cards to them or remove them.
+A Kantan CLI tool. Create boards, add cards to them or remove them. 
+
+Built in Python using Typer, it stores cards as JSON data, trivially exportable and usable in other platforms if desired.
 
 ## How to Use 🚀
 

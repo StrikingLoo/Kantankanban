@@ -1,12 +1,20 @@
-"""This module provides the RP To-Do CLI."""
+"""This module provides the RP Card CLI."""
 from typing import List, Optional
 import typer
 from kantankanban import ERRORS, __app_name__, __version__, config, database, kanban
 from pathlib import Path
 from typing_extensions import Annotated
 import os
+from enum import Enum
 
 app = typer.Typer()
+
+colors = {
+'ERROR' : typer.colors.RED,
+'SUCCESS' : typer.colors.GREEN,
+'INFO' : typer.colors.CYAN
+}
+    
 
 @app.command()
 def init(
@@ -22,25 +30,25 @@ def init(
     if os.path.exists(db_path):
         typer.secho(
             f'Board \"{board_name}\" already exists.',
-            fg=typer.colors.RED,
+            fg=colors['ERROR'],
         )
         raise typer.Exit(1)
     app_init_error = config.init_app(db_path)
     if app_init_error:
         typer.secho(
             f'Creating config file failed with "{ERRORS[app_init_error]}"',
-            fg=typer.colors.RED,
+            fg=colors['ERROR'],
         )
         raise typer.Exit(1)
     db_init_error = database.init_database(Path(db_path))
     if db_init_error:
         typer.secho(
             f'Creating database failed with "{ERRORS[db_init_error]}"',
-            fg=typer.colors.RED,
+            fg=colors['ERROR'],
         )
         raise typer.Exit(1)
     else:
-        typer.secho(f"The board database is {db_path}", fg=typer.colors.GREEN)
+        typer.secho(f"The board database is {db_path}", fg=colors['SUCCESS'])
         # Add new board to boards board
         BOARDS_BOARD_NAME = 'boards'
         db_path = database.get_board_path(BOARDS_BOARD_NAME)
@@ -48,15 +56,15 @@ def init(
             app_init_error = config.init_app(db_path)
             db_init_error = database.init_database(Path(db_path))
         board = get_kanban(BOARDS_BOARD_NAME)
-        todo, _ = board.add([board_name])
+        card, _ = board.add([board_name])
 
 def get_kanban(board_name) -> kanban.Kanban:
     if config.CONFIG_FILE_PATH.exists():
         db_path = database.get_database_path(config.CONFIG_FILE_PATH, board_name)
     else:
         typer.secho(
-            'Config file not found. Please, run "kantankanban init"',
-            fg=typer.colors.RED,
+            f'Config file not found. Please, run "kantankanban init {board_name}"',
+            fg=colors['ERROR'],
         )
         raise typer.Exit(1)
     if db_path.exists():
@@ -64,66 +72,94 @@ def get_kanban(board_name) -> kanban.Kanban:
     else:
         typer.secho(
             f'Board {board_name} not found. Please, run "kantankanban init {board_name}"',
-            fg=typer.colors.RED,
+            fg=colors['ERROR'],
         )
         raise typer.Exit(1)
 
 @app.command()
 def add(
-    board_name: str = typer.Option('default', '-n'),
     title: List[str] = typer.Argument(...),
+    board_name: str = typer.Option('default', '-n'),
+    tags: str = typer.Option('', "--tags", help="Tags as a single string. Separated by commas by convention.")
 ) -> None:
     """Add a new card with a title."""
     board = get_kanban(board_name)
-    todo, error = board.add(title)
+    card, error = board.add(title, tags)
+    
     if error:
         typer.secho(
-            f'Adding card failed with "{ERRORS[error]}"', fg=typer.colors.RED
+            f'Adding card failed with "{ERRORS[error]}"', fg=colors['ERROR']
         )
         raise typer.Exit(1)
     else:
         typer.secho(
-            f"""Card: "{todo['Title']}" was added """
+            f"""Card: "{card['Title']}" was added """
             f"""to board {board_name}""",
-            fg=typer.colors.GREEN,
+            fg=colors['SUCCESS'],
         )
 
 @app.command(name="list")
 def list_all(board_name: str = typer.Option('default', '-n'),
-    show_date: int = typer.Option(0, '-d', '--show-date')
+    show_date: int = typer.Option(0, '-d', '--show-date'),
+    show_tags: bool = typer.Option(False, '-t', '--show-tags')
     ) -> None:
     """List all cards."""
     board = get_kanban(board_name)
-    todo_list = board.get_todo_list()
-    if len(todo_list) == 0:
+    card_list = board.get_card_list()
+    if len(card_list) == 0:
         typer.secho(
-            f"There are no cards in the board \"{board_name}\" yet", fg=typer.colors.CYAN
+            f"There are no cards in the board \"{board_name}\" yet", fg=colors['INFO']
         )
         raise typer.Exit()
-    typer.secho(f"\nboard - {board_name}:\n", fg=typer.colors.CYAN, bold=True)
+
+    ### get card data first
+
+    data = {'titles' : [], 'creation_dates': [], 'tags': [] }
+    tags_exist = False
+    for index, card in enumerate(card_list):
+        values = card.values()
+        if len(values) == 2:
+            title, creation_date = values
+            data['tags'].append('')
+        else:
+            title, creation_date, tags = values
+            data['tags'].append(tags)
+            tags_exist = True
+        data['titles'].append(title)
+        data['creation_dates'].append(creation_date)
+    if not show_tags:
+        tags_exist = False
+    if tags_exist:
+        max_tag_length = max([len(tag) for tag in data['tags']])
+    ### Format and print card data
+    typer.secho(f"\nboard - {board_name}:\n", fg=colors['INFO'], bold=True)
     columns = (
         "ID  ",
         "|    Creation Date    " if show_date == 1 else '',
+        "| Tags "+' '*(max_tag_length-4) if tags_exist == 1 else '',
         "| Title  ",
     )
     headers = "".join(columns)
-    typer.secho(headers, fg=typer.colors.CYAN, bold=True)
-    typer.secho("-" * len(headers), fg=typer.colors.CYAN)
-    for index, todo in enumerate(todo_list):
-        title, creation_date = todo.values() # ugly and will be fixed
+    typer.secho(headers, fg=colors['INFO'], bold=True)
+    typer.secho("-" * len(headers), fg=colors['INFO'])
+    for index, title in enumerate(data['titles']):
+        creation_date, tags = data['creation_dates'][index], data['tags'][index]
+
         date_string = f"| {creation_date}{(len(columns[1]) - len(str(creation_date)) - 2) * ' '}"
+        tags_string = f"| {tags}{(len(columns[2]) - len(str(tags)) - 2) * ' '}"
         typer.secho(
             f"{index}{(len(columns[0]) - len(str(index))) * ' '}"
             f"{date_string if show_date == 1 else ''}"
+            f"{tags_string if tags_exist else ''}"
             f"| {title}",
-            fg=typer.colors.CYAN,
+            fg=colors['INFO'],
         )
-    typer.secho("-" * len(headers) + "\n", fg=typer.colors.CYAN)
+    typer.secho("-" * len(headers) + "\n", fg=colors['INFO'])
 
 @app.command()
 def remove(
     board_name: str = typer.Option('default', '-n'),
-    todo_id: int = typer.Argument(...),
+    card_id: int = typer.Argument(...),
     force: bool = typer.Option(
         False,
         "--force",
@@ -135,30 +171,30 @@ def remove(
     board = get_kanban(board_name)
 
     def _remove():
-        todo, error = board.remove(todo_id)
+        card, error = board.remove(card_id)
         if error:
             typer.secho(
-                f'Removing card #{todo_id} failed with "{ERRORS[error]}"',
-                fg=typer.colors.RED,
+                f'Removing card #{card_id} failed with "{ERRORS[error]}"',
+                fg=colors['ERROR'],
             )
             raise typer.Exit(1)
         else:
             typer.secho(
-                f"""Card #{todo_id}: '{todo["Title"]}' was removed from board {board_name}""",
-                fg=typer.colors.GREEN,
+                f"""Card #{card_id}: '{card["Title"]}' was removed from board {board_name}""",
+                fg=colors['SUCCESS'],
             )
 
     if force:
         _remove()
     else:
-        todo_list = board.get_todo_list()
+        card_list = board.get_card_list()
         try:
-            todo = todo_list[todo_id]
+            card = card_list[card_id]
         except IndexError:
-            typer.secho("Invalid TODO_ID", fg=typer.colors.RED)
+            typer.secho("Invalid TODO_ID", fg=colors['ERROR'])
             raise typer.Exit(1)
         delete = typer.confirm(
-            f"Delete card #{todo_id}: \"{todo['Title']}\" from board {board_name}?"
+            f"Delete card #{card_id}: \"{card['Title']}\" from board {board_name}?"
         )
         if delete:
             _remove()
@@ -181,11 +217,11 @@ def remove_all(
         if error:
             typer.secho(
                 f'Removing cards failed with "{ERRORS[error]}"',
-                fg=typer.colors.RED,
+                fg=colors['ERROR'],
             )
             raise typer.Exit(1)
         else:
-            typer.secho(f"All cards were removed from board \"{board_name}\"", fg=typer.colors.GREEN)
+            typer.secho(f"All cards were removed from board \"{board_name}\"", fg=colors['SUCCESS'])
     else:
         typer.echo("Operation canceled")
 
@@ -206,5 +242,3 @@ def main(
     )
 ) -> None:
     return
-
-# priority: int = typer.Option(2, "--priority", "-p", min=1, max=5),

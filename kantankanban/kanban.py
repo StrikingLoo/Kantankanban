@@ -5,8 +5,8 @@ from kantankanban.database import DatabaseHandler
 from datetime import datetime
 
 
-class CurrentTodo(NamedTuple):
-    todo: Dict[str, Any] # I will change this to a real type soon enough.
+class CurrentCard(NamedTuple):
+    card: Dict[str, Any] # I will change this to a real type soon enough.
     error: int
 
 class Kanban:
@@ -14,53 +14,42 @@ class Kanban:
         self._db_handler = DatabaseHandler(db_path)
 
     # TO DO: erase mentions of priority, add tags. Add ID and title instead
-    def add(self, title: List[str]) -> CurrentTodo:
-        """Add a new to-do to the database."""
+    def add(self, title: List[str], tags: str = '') -> CurrentCard:
+        """Add a new card to the database."""
         title_text = " ".join(title)
-        todo = {
+        card = {
             "Title": title_text,
-            "Creation Date": datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+            "Creation Date": datetime.now().strftime("%d/%m/%Y %H:%M:%S"),
         }
+        if tags != '':
+            card['Tags'] = tags
+
         # New format I'm imagining: title, category, tags, description, date added
-        read = self._db_handler.read_todos() # Let's make this append only soon.
+        read = self._db_handler.read_cards() # Let's make this append only soon.
         if read.error == DB_READ_ERROR:
-            return CurrentTodo(todo, read.error)
-        read.todo_list.append(todo)
-        write = self._db_handler.write_todos(read.todo_list)
-        return CurrentTodo(todo, write.error)
+            return CurrentCard(card, read.error)
+        read.card_list.append(card)
+        write = self._db_handler.write_cards(read.card_list)
+        return CurrentCard(card, write.error)
 
-    def remove(self, todo_id: int) -> CurrentTodo:
+    def remove(self, card_id: int) -> CurrentCard:
         """Remove a card from the board using its id or index."""
-        read = self._db_handler.read_todos()
+        read = self._db_handler.read_cards()
         if read.error:
-            return CurrentTodo({}, read.error)
+            return CurrentCard({}, read.error)
         try:
-            todo = read.todo_list.pop(todo_id)
+            card = read.card_list.pop(card_id)
         except IndexError:
-            return CurrentTodo({}, ID_ERROR)
-        write = self._db_handler.write_todos(read.todo_list)
-        return CurrentTodo(todo, write.error)
+            return CurrentCard({}, ID_ERROR)
+        write = self._db_handler.write_cards(read.card_list)
+        return CurrentCard(card, write.error)
 
-    def remove_all(self) -> CurrentTodo:
+    def remove_all(self) -> CurrentCard:
         """Remove all cards from the board."""
-        write = self._db_handler.write_todos([])
-        return CurrentTodo({}, write.error)
+        write = self._db_handler.write_cards([])
+        return CurrentCard({}, write.error)
 
-    def get_todo_list(self) -> List[Dict[str, Any]]:
+    def get_card_list(self) -> List[Dict[str, Any]]:
         """Return the current card list."""
-        read = self._db_handler.read_todos()
-        return read.todo_list
-
-'''
-class Card():
-
-    def __init__(self, title, priority):
-        self.title = title
-        self.priority = priority
-
-    title: str
-    priority: int
-
-    def __str__(self):
-        return f'\{title: {self.title}, priority: {self.priority}\}'
-'''
+        read = self._db_handler.read_cards()
+        return read.card_list
