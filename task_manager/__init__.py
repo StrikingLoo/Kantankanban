@@ -1,7 +1,4 @@
-"""Top-level package for Task Manager."""
-# task_manager/__init__.py
-
-__app_name__ = "task-manager"
+__app_name__ = "kantankanban"
 __version__ = "0.1.0"
 
 (

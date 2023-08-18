@@ -17,7 +17,7 @@ def init(
         prompt="board name?",
     ),
 ) -> None:
-    """Initialize the to-do database."""
+    """Initialize a new board."""
     db_path = database.get_board_path(board_name)
     app_init_error = config.init_app(db_path)
     if app_init_error:
@@ -60,7 +60,7 @@ def add(
     title: List[str] = typer.Argument(...),
     priority: int = typer.Option(2, "--priority", "-p", min=1, max=5),
 ) -> None:
-    """Add a new to-do with a title."""
+    """Add a new card with a title."""
     todoer = get_todoer(board_name)
     todo, error = todoer.add(title, priority)
     if error:
@@ -115,7 +115,7 @@ def remove(
         help="Force deletion without confirmation.",
     ),
 ) -> None:
-    """Remove a to-do using its TODO_ID."""
+    """Remove a card using its ID."""
     todoer = get_todoer(board_name)
 
     def _remove():
@@ -158,7 +158,7 @@ def remove_all(
         help="Force deletion without confirmation.",
     ),
 ) -> None:
-    """Remove all to-dos."""
+    """Remove all cards from a board."""
     todoer = get_todoer(board_name)
     if force:
         error = todoer.remove_all().error

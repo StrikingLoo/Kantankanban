@@ -1,5 +1,3 @@
-"""This module provides the config functionality."""
-
 import configparser
 from pathlib import Path
 

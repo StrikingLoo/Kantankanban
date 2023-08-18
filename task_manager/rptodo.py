@@ -28,7 +28,7 @@ class Todoer:
         return CurrentTodo(todo, write.error)
 
     def remove(self, todo_id: int) -> CurrentTodo:
-        """Remove a to-do from the database using its id or index."""
+        """Remove a card from the board using its id or index."""
         read = self._db_handler.read_todos()
         if read.error:
             return CurrentTodo({}, read.error)
@@ -40,12 +40,12 @@ class Todoer:
         return CurrentTodo(todo, write.error)
 
     def remove_all(self) -> CurrentTodo:
-        """Remove all to-dos from the database."""
+        """Remove all cards from the board."""
         write = self._db_handler.write_todos([])
         return CurrentTodo({}, write.error)
 
     def get_todo_list(self) -> List[Dict[str, Any]]:
-        """Return the current to-do list."""
+        """Return the current card list."""
         read = self._db_handler.read_todos()
         return read.todo_list
 

@@ -1,5 +1,3 @@
-"""task_manager entry point script."""
-
 from task_manager import cli, __app_name__
 
 def main():
