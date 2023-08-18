@@ -6,25 +6,25 @@ A Kantan CLI tool. Create boards, add cards to them or remove them.
 
 First, initialize a new board:
 
-`python -m kantakanban init -n $BOARD_NAME`
+`python -m kantankanban init -n $BOARD_NAME`
 
 See all available boards:
 
-`python -m kantakanban list -n boards`
+`python -m kantankanban list -n boards`
 
 See all cards in a board:
 
-`python -m kantakanban list -n $BOARD_NAME` (Yes, the board list is just another meta-board!)
+`python -m kantankanban list -n $BOARD_NAME` (Yes, the board list is just another meta-board!)
 
 Add `-d 1` to see card creation date.
 
 Add a new card to a board:
 
-`python -m kantakanban add 'Card Title' -n $BOARD_NAME`
+`python -m kantankanban add 'Card Title' -n $BOARD_NAME`
 
 Remove a card from a board:
 
-`python -m kantakanban remove $ID -n $BOARD_NAME` (Get the ID by listing the cards. IDs are mutable)
+`python -m kantankanban remove $ID -n $BOARD_NAME` (Get the ID by listing the cards. IDs are mutable)
 
 ## Future Updates
 
