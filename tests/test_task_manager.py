@@ -29,18 +29,16 @@ test_data1 = {
     "description": ["Clean", "the", "house"],
     "priority": 1,
     "todo": {
-        "Description": "Clean the house",
-        "Priority": 1,
-        "Done": False,
+        "Title": "Clean the house",
+        "Priority": 1
     },
 }
 test_data2 = {
     "description": ["Wash the car"],
     "priority": 2,
     "todo": {
-        "Description": "Wash the car",
-        "Priority": 2,
-        "Done": False,
+        "Title": "Wash the car",
+        "Priority": 2
     },
 }
 
