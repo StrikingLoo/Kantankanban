@@ -1,6 +1,6 @@
 # Kantankanban 📌
 
-A Kantan CLI tool. Create boards, add cards to them or remove them. 
+A Kanban CLI tool. Create boards, add cards to them or remove them. 
 
 Built in Python using Typer, it stores cards as JSON data, trivially exportable and usable in other platforms if desired.
 
@@ -18,8 +18,6 @@ Built in Python using Typer, it stores cards as JSON data, trivially exportable 
 
 `python -m kantankanban list -n $BOARD_NAME` (Yes, the board list is just another meta-board!)
 
-Add `-d 1` to see cards' creation dates. 🗓
-
 This command will result in something like this:
 
 ```
@@ -34,6 +32,7 @@ ID  | Title
 -------------
 ```
 
+Add `-d 1` to see cards' creation dates. 🗓
 
 🌷 Add a new card to a board:
 
@@ -86,7 +85,7 @@ ID  | Tags            | Title
 
 Will add soon:
 - `mv` command to transfer a card from one board to another
-- Anything else I can think of, or any user suggests
+- Anything else I can think of, or user requests
 
 ### Relevant commands
 
