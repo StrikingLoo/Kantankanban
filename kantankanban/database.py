@@ -2,7 +2,7 @@ import configparser
 from pathlib import Path
 import json
 from typing import Any, Dict, List, NamedTuple
-from task_manager import DB_READ_ERROR, DB_WRITE_ERROR, JSON_ERROR, SUCCESS
+from kantankanban import DB_READ_ERROR, DB_WRITE_ERROR, JSON_ERROR, SUCCESS
 
 DEFAULT_DB_FILE_PATH = Path.home().joinpath(
     "." + Path.home().stem + "_task.json"

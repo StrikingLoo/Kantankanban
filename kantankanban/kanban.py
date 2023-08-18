@@ -1,13 +1,13 @@
 from typing import Any, Dict, List, NamedTuple
-from task_manager import DB_READ_ERROR
+from kantankanban import DB_READ_ERROR
 from pathlib import Path
-from task_manager.database import DatabaseHandler
+from kantankanban.database import DatabaseHandler
 
 class CurrentTodo(NamedTuple):
     todo: Dict[str, Any] # I will change this to a real type soon enough.
     error: int
 
-class Todoer:
+class Kanban:
     def __init__(self, db_path: Path) -> None:
         self._db_handler = DatabaseHandler(db_path)
 

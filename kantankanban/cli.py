@@ -1,7 +1,7 @@
 """This module provides the RP To-Do CLI."""
 from typing import List, Optional
 import typer
-from task_manager import ERRORS, __app_name__, __version__, config, database, rptodo
+from kantankanban import ERRORS, __app_name__, __version__, config, database, kanban
 from pathlib import Path
 from typing_extensions import Annotated
 import os
@@ -46,23 +46,23 @@ def init(
         db_path = database.get_board_path(BOARDS_BOARD_NAME)
         app_init_error = config.init_app(db_path)
         db_init_error = database.init_database(Path(db_path))
-        todoer = get_todoer(BOARDS_BOARD_NAME)
-        todo, _ = todoer.add([board_name])
+        board = get_kanban(BOARDS_BOARD_NAME)
+        todo, _ = board.add([board_name])
 
-def get_todoer(board_name) -> rptodo.Todoer:
+def get_kanban(board_name) -> kanban.Kanban:
     if config.CONFIG_FILE_PATH.exists():
         db_path = database.get_database_path(config.CONFIG_FILE_PATH, board_name)
     else:
         typer.secho(
-            'Config file not found. Please, run "task_manager init"',
+            'Config file not found. Please, run "kantankanban init"',
             fg=typer.colors.RED,
         )
         raise typer.Exit(1)
     if db_path.exists():
-        return rptodo.Todoer(db_path)
+        return kanban.Kanban(db_path)
     else:
         typer.secho(
-            f'Board {board_name} not found. Please, run "task_manager init {board_name}"',
+            f'Board {board_name} not found. Please, run "kantankanban init {board_name}"',
             fg=typer.colors.RED,
         )
         raise typer.Exit(1)
@@ -73,8 +73,8 @@ def add(
     title: List[str] = typer.Argument(...),
 ) -> None:
     """Add a new card with a title."""
-    todoer = get_todoer(board_name)
-    todo, error = todoer.add(title)
+    board = get_kanban(board_name)
+    todo, error = board.add(title)
     if error:
         typer.secho(
             f'Adding card failed with "{ERRORS[error]}"', fg=typer.colors.RED
@@ -90,8 +90,8 @@ def add(
 @app.command(name="list")
 def list_all(board_name: str = typer.Option('default', '-n')) -> None:
     """List all cards."""
-    todoer = get_todoer(board_name)
-    todo_list = todoer.get_todo_list()
+    board = get_kanban(board_name)
+    todo_list = board.get_todo_list()
     if len(todo_list) == 0:
         typer.secho(
             f"There are no cards in the board \"{board_name}\" yet", fg=typer.colors.CYAN
@@ -128,10 +128,10 @@ def remove(
     ),
 ) -> None:
     """Remove a card using its ID."""
-    todoer = get_todoer(board_name)
+    board = get_kanban(board_name)
 
     def _remove():
-        todo, error = todoer.remove(todo_id)
+        todo, error = board.remove(todo_id)
         if error:
             typer.secho(
                 f'Removing card #{todo_id} failed with "{ERRORS[error]}"',
@@ -147,14 +147,14 @@ def remove(
     if force:
         _remove()
     else:
-        todo_list = todoer.get_todo_list()
+        todo_list = board.get_todo_list()
         try:
             todo = todo_list[todo_id]
         except IndexError:
             typer.secho("Invalid TODO_ID", fg=typer.colors.RED)
             raise typer.Exit(1)
         delete = typer.confirm(
-            f"Delete card #{todo_id}: {todo['Title']} from board {board_name}?"
+            f"Delete card #{todo_id}: \"{todo['Title']}\" from board {board_name}?"
         )
         if delete:
             _remove()
@@ -171,9 +171,9 @@ def remove_all(
     ),
 ) -> None:
     """Remove all cards from a board."""
-    todoer = get_todoer(board_name)
+    board = get_kanban(board_name)
     if force:
-        error = todoer.remove_all().error
+        error = board.remove_all().error
         if error:
             typer.secho(
                 f'Removing cards failed with "{ERRORS[error]}"',

@@ -1,10 +1,10 @@
 from typer.testing import CliRunner
-from task_manager import (DB_READ_ERROR,
+from kantankanban import (DB_READ_ERROR,
     SUCCESS,
     __app_name__,
     __version__,
     cli,
-    rptodo)
+    kanban)
 import json
 
 import pytest
@@ -58,7 +58,7 @@ test_data2 = {
     ],
 )
 def test_add(mock_json_file, description, priority, expected):
-    todoer = rptodo.Todoer(mock_json_file)
+    todoer = kanban.Kanban(mock_json_file)
     assert todoer.add(description, priority) == expected
     read = todoer._db_handler.read_todos()
     assert len(read.todo_list) == 2
