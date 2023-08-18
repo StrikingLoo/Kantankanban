@@ -56,7 +56,7 @@ def get_todoer(board_name) -> rptodo.Todoer:
 
 @app.command()
 def add(
-    board_name: str = typer.Option(default = 'default'),
+    board_name: str = typer.Option('default', '-n'),
     title: List[str] = typer.Argument(...),
     priority: int = typer.Option(2, "--priority", "-p", min=1, max=5),
 ) -> None:
@@ -76,7 +76,7 @@ def add(
         )
 
 @app.command(name="list")
-def list_all(board_name: str = typer.Option(default = 'default')) -> None:
+def list_all(board_name: str = typer.Option('default', '-n')) -> None:
     """List all cards."""
     todoer = get_todoer(board_name)
     todo_list = todoer.get_todo_list()
@@ -106,7 +106,7 @@ def list_all(board_name: str = typer.Option(default = 'default')) -> None:
 
 @app.command()
 def remove(
-    board_name: str = typer.Option(default = 'default'),
+    board_name: str = typer.Option('default', '-n'),
     todo_id: int = typer.Argument(...),
     force: bool = typer.Option(
         False,
@@ -151,7 +151,7 @@ def remove(
 
 @app.command(name="clear")
 def remove_all(
-    board_name: str = typer.Option(default = 'default'),
+    board_name: str = typer.Option('default', '-n'),
     force: bool = typer.Option(
         ...,
         prompt="Delete all tasks?",
