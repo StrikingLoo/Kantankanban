@@ -88,7 +88,9 @@ def add(
         )
 
 @app.command(name="list")
-def list_all(board_name: str = typer.Option('default', '-n')) -> None:
+def list_all(board_name: str = typer.Option('default', '-n'),
+    show_date: int = typer.Option(0, '-d', '--show-date')
+    ) -> None:
     """List all cards."""
     board = get_kanban(board_name)
     todo_list = board.get_todo_list()
@@ -100,17 +102,18 @@ def list_all(board_name: str = typer.Option('default', '-n')) -> None:
     typer.secho(f"\nboard - {board_name}:\n", fg=typer.colors.CYAN, bold=True)
     columns = (
         "ID  ",
+        "|    Creation Date    " if show_date == 1 else '',
         "| Title  ",
     )
     headers = "".join(columns)
     typer.secho(headers, fg=typer.colors.CYAN, bold=True)
     typer.secho("-" * len(headers), fg=typer.colors.CYAN)
     for index, todo in enumerate(todo_list):
-        title = list(todo.values())[0] # ugly and will be fixed
+        title, creation_date = todo.values() # ugly and will be fixed
+        date_string = f"| {creation_date}{(len(columns[1]) - len(str(creation_date)) - 2) * ' '}"
         typer.secho(
             f"{index}{(len(columns[0]) - len(str(index))) * ' '}"
-            #f"| ({priority}){(len(columns[1]) - len(str(priority)) - 4) * ' '}"
-            #f"| {done}{(len(columns[2]) - len(str(done)) - 2) * ' '}"
+            f"{date_string if show_date == 1 else ''}"
             f"| {title}",
             fg=typer.colors.CYAN,
         )

@@ -2,6 +2,8 @@ from typing import Any, Dict, List, NamedTuple
 from kantankanban import DB_READ_ERROR
 from pathlib import Path
 from kantankanban.database import DatabaseHandler
+from datetime import datetime
+
 
 class CurrentTodo(NamedTuple):
     todo: Dict[str, Any] # I will change this to a real type soon enough.
@@ -17,6 +19,7 @@ class Kanban:
         title_text = " ".join(title)
         todo = {
             "Title": title_text,
+            "Creation Date": datetime.now().strftime("%d/%m/%Y %H:%M:%S")
         }
         # New format I'm imagining: title, category, tags, description, date added
         read = self._db_handler.read_todos() # Let's make this append only soon.
