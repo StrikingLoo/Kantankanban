@@ -44,8 +44,9 @@ def init(
         # Add new board to boards board
         BOARDS_BOARD_NAME = 'boards'
         db_path = database.get_board_path(BOARDS_BOARD_NAME)
-        app_init_error = config.init_app(db_path)
-        db_init_error = database.init_database(Path(db_path))
+        if not os.path.exists(db_path):
+            app_init_error = config.init_app(db_path)
+            db_init_error = database.init_database(Path(db_path))
         board = get_kanban(BOARDS_BOARD_NAME)
         todo, _ = board.add([board_name])
 
