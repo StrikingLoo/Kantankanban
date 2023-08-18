@@ -4,7 +4,7 @@ import typer
 from task_manager import ERRORS, __app_name__, __version__, config, database, rptodo
 from pathlib import Path
 from typing_extensions import Annotated
-
+import os
 
 app = typer.Typer()
 
@@ -19,6 +19,12 @@ def init(
 ) -> None:
     """Initialize a new board."""
     db_path = database.get_board_path(board_name)
+    if os.path.exists(db_path):
+        typer.secho(
+            f'Board \"{board_name}\" already exists.',
+            fg=typer.colors.RED,
+        )
+        raise typer.Exit(1)
     app_init_error = config.init_app(db_path)
     if app_init_error:
         typer.secho(
@@ -35,6 +41,13 @@ def init(
         raise typer.Exit(1)
     else:
         typer.secho(f"The board database is {db_path}", fg=typer.colors.GREEN)
+        # Add new board to boards board
+        BOARDS_BOARD_NAME = 'boards'
+        db_path = database.get_board_path(BOARDS_BOARD_NAME)
+        app_init_error = config.init_app(db_path)
+        db_init_error = database.init_database(Path(db_path))
+        todoer = get_todoer(BOARDS_BOARD_NAME)
+        todo, _ = todoer.add([board_name])
 
 def get_todoer(board_name) -> rptodo.Todoer:
     if config.CONFIG_FILE_PATH.exists():
@@ -58,11 +71,10 @@ def get_todoer(board_name) -> rptodo.Todoer:
 def add(
     board_name: str = typer.Option('default', '-n'),
     title: List[str] = typer.Argument(...),
-    priority: int = typer.Option(2, "--priority", "-p", min=1, max=5),
 ) -> None:
     """Add a new card with a title."""
     todoer = get_todoer(board_name)
-    todo, error = todoer.add(title, priority)
+    todo, error = todoer.add(title)
     if error:
         typer.secho(
             f'Adding card failed with "{ERRORS[error]}"', fg=typer.colors.RED
@@ -71,7 +83,7 @@ def add(
     else:
         typer.secho(
             f"""Card: "{todo['Title']}" was added """
-            f"""with priority: {priority}""",
+            f"""to board {board_name}""",
             fg=typer.colors.GREEN,
         )
 
@@ -82,19 +94,19 @@ def list_all(board_name: str = typer.Option('default', '-n')) -> None:
     todo_list = todoer.get_todo_list()
     if len(todo_list) == 0:
         typer.secho(
-            "There are no cards in the board yet", fg=typer.colors.CYAN
+            f"There are no cards in the board \"{board_name}\" yet", fg=typer.colors.CYAN
         )
         raise typer.Exit()
     typer.secho(f"\nboard - {board_name}:\n", fg=typer.colors.CYAN, bold=True)
     columns = (
-        "ID.  ",
+        "ID  ",
         "| Title  ",
     )
     headers = "".join(columns)
     typer.secho(headers, fg=typer.colors.CYAN, bold=True)
     typer.secho("-" * len(headers), fg=typer.colors.CYAN)
     for index, todo in enumerate(todo_list):
-        title, priority = todo.values()
+        title = list(todo.values())[0] # ugly and will be fixed
         typer.secho(
             f"{index}{(len(columns[0]) - len(str(index))) * ' '}"
             #f"| ({priority}){(len(columns[1]) - len(str(priority)) - 4) * ' '}"
@@ -128,7 +140,7 @@ def remove(
             raise typer.Exit(1)
         else:
             typer.secho(
-                f"""Card #{todo_id}: '{todo["Title"]}' was removed""",
+                f"""Card #{todo_id}: '{todo["Title"]}' was removed from board {board_name}""",
                 fg=typer.colors.GREEN,
             )
 
@@ -142,7 +154,7 @@ def remove(
             typer.secho("Invalid TODO_ID", fg=typer.colors.RED)
             raise typer.Exit(1)
         delete = typer.confirm(
-            f"Delete card #{todo_id}: {todo['Title']}?"
+            f"Delete card #{todo_id}: {todo['Title']} from board {board_name}?"
         )
         if delete:
             _remove()
@@ -154,7 +166,7 @@ def remove_all(
     board_name: str = typer.Option('default', '-n'),
     force: bool = typer.Option(
         ...,
-        prompt="Delete all tasks?",
+        prompt=f"Delete all cards from board?",
         help="Force deletion without confirmation.",
     ),
 ) -> None:
@@ -164,12 +176,12 @@ def remove_all(
         error = todoer.remove_all().error
         if error:
             typer.secho(
-                f'Removing tasks failed with "{ERRORS[error]}"',
+                f'Removing cards failed with "{ERRORS[error]}"',
                 fg=typer.colors.RED,
             )
             raise typer.Exit(1)
         else:
-            typer.secho("All tasks were removed", fg=typer.colors.GREEN)
+            typer.secho(f"All cards were removed from board \"{board_name}\"", fg=typer.colors.GREEN)
     else:
         typer.echo("Operation canceled")
 
@@ -190,3 +202,5 @@ def main(
     )
 ) -> None:
     return
+
+# priority: int = typer.Option(2, "--priority", "-p", min=1, max=5),

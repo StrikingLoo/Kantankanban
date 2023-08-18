@@ -12,12 +12,11 @@ class Todoer:
         self._db_handler = DatabaseHandler(db_path)
 
     # TO DO: erase mentions of priority, add tags. Add ID and title instead
-    def add(self, title: List[str], priority: int = 2) -> CurrentTodo:
+    def add(self, title: List[str]) -> CurrentTodo:
         """Add a new to-do to the database."""
         title_text = " ".join(title)
         todo = {
             "Title": title_text,
-            "Priority": priority,
         }
         # New format I'm imagining: title, category, tags, description, date added
         read = self._db_handler.read_todos() # Let's make this append only soon.
