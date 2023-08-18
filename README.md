@@ -45,4 +45,4 @@ Run tests:
 
 Initial code and project structure inspired by [RealPython.com](https://realpython.com/python-typer-cli/).
 
-See other projects by me on my [blog](https://strikingloo.github.io).
+See other projects by me on my [blog](https://strikingloo.github.io/blog/).
