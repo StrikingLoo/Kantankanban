@@ -42,6 +42,8 @@ Add `-d 1` to see cards' creation dates. 🗓
 
 `python -m kantankanban remove $ID -n $BOARD_NAME` (Get the ID by listing the cards. IDs are mutable)
 
+The board name can be omitted in add, list and remove commands, effectively allowing for the tool to be used as a single-board kanban (with board: default) and making the commands less verbose.
+
 ### Advanced Feature: Tags
 
 Just like Trello and other similar software, this program supports tags (/labels) in cards.
