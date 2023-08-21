@@ -98,6 +98,47 @@ def add(
             fg=colors['SUCCESS'],
         )
 
+@app.command()
+def mv(
+    src_board_name: str = typer.Option('default', '-s', '--src'),
+    dst_board_name: str = typer.Option('default', '-d', '--dst'),
+    card_id: int = typer.Argument(...),
+) -> None:
+    """ Move a card from src to dst board (effectively remove from src and add to dst) """
+    src_board = get_kanban(src_board_name)
+
+    card_list = src_board.get_card_list()
+    try:
+        card = card_list[card_id]
+    except IndexError:
+        typer.secho("Card index out of bounds.", fg=colors['ERROR'])
+        raise typer.Exit(1)
+    values = card.values()
+    title, creation_date, tags = None, None, ''
+    if len(values) == 2:
+        title, creation_date = values
+    else:
+        title, creation_date, tags = values
+        tags_exist = True
+
+    _remove(src_board, card_id, src_board_name)
+
+    """Add a new card with a title."""
+    dst_board = get_kanban(dst_board_name)
+    new_card, error = dst_board.add([title], tags)
+    
+    if error:
+        typer.secho(
+            f'Adding card failed with "{ERRORS[error]}"', fg=colors['ERROR']
+        )
+        raise typer.Exit(1)
+    else:
+        typer.secho(
+            f"""Card: "{new_card['Title']}" was added """
+            f"""to board {dst_board_name}""",
+            fg=colors['SUCCESS'],
+        )
+
 @app.command(name="list")
 def list_all(board_name: str = typer.Option('default', '-n'),
     show_date: int = typer.Option(0, '-d', '--show-date'),
@@ -156,6 +197,20 @@ def list_all(board_name: str = typer.Option('default', '-n'),
         )
     typer.secho("-" * len(headers) + "\n", fg=colors['INFO'])
 
+def _remove(board, card_id, board_name):
+    card, error = board.remove(card_id)
+    if error:
+        typer.secho(
+            f'Removing card #{card_id} failed with "{ERRORS[error]}"',
+            fg=colors['ERROR'],
+        )
+        raise typer.Exit(1)
+    else:
+        typer.secho(
+            f"""Card #{card_id}: \"{card["Title"]}\" was removed from board {board_name}""",
+            fg=colors['SUCCESS'],
+        )
+
 @app.command()
 def remove(
     board_name: str = typer.Option('default', '-n'),
@@ -170,34 +225,20 @@ def remove(
     """Remove a card using its ID."""
     board = get_kanban(board_name)
 
-    def _remove():
-        card, error = board.remove(card_id)
-        if error:
-            typer.secho(
-                f'Removing card #{card_id} failed with "{ERRORS[error]}"',
-                fg=colors['ERROR'],
-            )
-            raise typer.Exit(1)
-        else:
-            typer.secho(
-                f"""Card #{card_id}: '{card["Title"]}' was removed from board {board_name}""",
-                fg=colors['SUCCESS'],
-            )
-
     if force:
-        _remove()
+        _remove(board, card_id, board_name)
     else:
         card_list = board.get_card_list()
         try:
             card = card_list[card_id]
         except IndexError:
-            typer.secho("Invalid TODO_ID", fg=colors['ERROR'])
+            typer.secho("Card index out of bounds.", fg=colors['ERROR'])
             raise typer.Exit(1)
         delete = typer.confirm(
             f"Delete card #{card_id}: \"{card['Title']}\" from board {board_name}?"
         )
         if delete:
-            _remove()
+            _remove(board, card_id, board_name)
         else:
             typer.echo("Operation canceled")
 
