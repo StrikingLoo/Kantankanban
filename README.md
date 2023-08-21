@@ -50,7 +50,7 @@ The board name can be omitted in add, list and remove commands, effectively allo
 
 This can effectively be used to e.g. track tasks with 3 boards: backlog, to-do, done. The order of the last two arguments is indiferent (Assembly convention possible but discouraged).
 
-The `./ktkb` command in this repo acts as an alias for `python -m kantankanban`, to reduce verbosity. It makes the user experience much more comfortable.
+The `./ktkb` command in this repo acts as an alias for `python -m kantankanban`, to reduce verbosity. It makes the user experience much more comfortable. E.g.: `./ktkb add 'red' -n colors`
 
 ### Advanced Feature: Tags
 
