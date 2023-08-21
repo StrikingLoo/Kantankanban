@@ -46,9 +46,11 @@ The board name can be omitted in add, list and remove commands, effectively allo
 
 🥾 Move a card from one board to another
 
-`python -m kantankanban remove $ID --src $SRC_BOARD_NAME --dst $DST_BOARD_NAME` (Get the ID by listing the cards. IDs are mutable). Moves the card under $ID from source board to destination board. 
+`python -m kantankanban mv $ID --src $SRC_BOARD_NAME --dst $DST_BOARD_NAME` (Get the ID by listing the cards. IDs are mutable). Moves the card under $ID from source board to destination board. 
 
 This can effectively be used to e.g. track tasks with 3 boards: backlog, to-do, done. The order of the last two arguments is indiferent (Assembly convention possible but discouraged).
+
+The `./ktkb` command in this repo acts as an alias for `python -m kantankanban`, to reduce verbosity. It makes the user experience much more comfortable.
 
 ### Advanced Feature: Tags
 
