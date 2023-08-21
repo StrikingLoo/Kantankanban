@@ -44,6 +44,12 @@ Add `-d 1` to see cards' creation dates. 🗓
 
 The board name can be omitted in add, list and remove commands, effectively allowing for the tool to be used as a single-board kanban (with board: default) and making the commands less verbose.
 
+🥾 Move a card from one board to another
+
+`python -m kantankanban remove $ID --src $SRC_BOARD_NAME --dst $DST_BOARD_NAME` (Get the ID by listing the cards. IDs are mutable). Moves the card under $ID from source board to destination board. 
+
+This can effectively be used to e.g. track tasks with 3 boards: backlog, to-do, done. The order of the last two arguments is indiferent (Assembly convention possible but discouraged).
+
 ### Advanced Feature: Tags
 
 Just like Trello and other similar software, this program supports tags (/labels) in cards.
@@ -82,12 +88,7 @@ ID  | Tags            | Title
 -----------------------------
 ```
 
-
-## Future Updates
-
-Will add soon:
-- `mv` command to transfer a card from one board to another
-- Anything else I can think of, or user requests
+This project is open to user suggestions and contributions. Any feedback will be appreciated!
 
 ### Relevant commands
 
