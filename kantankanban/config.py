@@ -40,3 +40,16 @@ def _create_database(db_path: str) -> int:
     except OSError:
         return DB_WRITE_ERROR
     return SUCCESS
+
+def make_settings(default_board_name):
+    settings_path = Path.home().joinpath(".kantakanban_config.ini")
+    settings_path.write_text('default='+default_board_name)
+
+def get_default_name():
+    settings_path = Path.home().joinpath(".kantakanban_config.ini")
+    try:
+        content = settings_path.read_text()
+        return content.split('=')[1]
+    except:
+        raise ValueError('Invalid config.ini file. Contents should be "default=$NAME".')
+

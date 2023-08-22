@@ -50,7 +50,25 @@ The board name can be omitted in add, list and remove commands, effectively allo
 
 This can effectively be used to e.g. track tasks with 3 boards: backlog, to-do, done. The order of the last two arguments is indiferent (Assembly convention possible but discouraged).
 
+🚲 Make all commands apply to a certain board by default
+
+`python -m kantankanban use $BOARD_NAME` or alias `./ktkb use $BOARD_NAME`.
+
+After using this command, all subsequent commands that take a -n $BOARD_NAME will assume you are using this one, unless otherwise specified. This reduces friction.
+
 The `./ktkb` command in this repo acts as an alias for `python -m kantankanban`, to reduce verbosity. It makes the user experience much more comfortable. E.g.: `./ktkb add 'red' -n colors`
+
+### Example workflow
+
+```bash
+./ktkb use to-do
+./ktkb init # assuming the board did not exist before
+./ktkb add 'Walk the dog'
+./ktkb add 'Feed the cat'
+./ktkb list # see all tasks
+./ktkb init -n done
+./ktkb mv 0 --from 'to-do' --to done # Mark a task as done
+```
 
 ### Advanced Feature: Tags
 

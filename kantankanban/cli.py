@@ -14,12 +14,16 @@ colors = {
 'SUCCESS' : typer.colors.GREEN,
 'INFO' : typer.colors.CYAN
 }
-    
+
+try:
+    default_board_name = config.get_default_name()
+except:
+    default_board_name = 'default'
 
 @app.command()
 def init(
     board_name: str = typer.Option(
-        'default',
+        default_board_name,
         "--name",
         "-n",
         prompt="board name?",
@@ -77,9 +81,19 @@ def get_kanban(board_name) -> kanban.Kanban:
         raise typer.Exit(1)
 
 @app.command()
+def use(
+    default_board_name: str = typer.Argument('--name'),
+) -> None:
+    config.make_settings(default_board_name)
+    typer.secho(
+            f"""Now using {default_board_name} as default board.""",
+            fg=colors['SUCCESS'],
+        )
+
+@app.command()
 def add(
     title: List[str] = typer.Argument(...),
-    board_name: str = typer.Option('default', '-n'),
+    board_name: str = typer.Option(default_board_name, '-n'),
     tags: str = typer.Option('', "--tags", help="Tags as a single string. Separated by commas by convention.")
 ) -> None:
     """Add a new card with a title."""
@@ -100,8 +114,8 @@ def add(
 
 @app.command()
 def mv(
-    src_board_name: str = typer.Option('default', '-s', '--src'),
-    dst_board_name: str = typer.Option('default', '-d', '--dst'),
+    src_board_name: str = typer.Option(default_board_name, '-s', '--src', '--from'),
+    dst_board_name: str = typer.Option(default_board_name, '-d', '--dst', '--to'),
     card_id: int = typer.Argument(...),
 ) -> None:
     """ Move a card from src to dst board (effectively remove from src and add to dst) """
@@ -140,7 +154,7 @@ def mv(
         )
 
 @app.command(name="list")
-def list_all(board_name: str = typer.Option('default', '-n'),
+def list_all(board_name: str = typer.Option(default_board_name, '-n'),
     show_date: int = typer.Option(0, '-d', '--show-date'),
     show_tags: bool = typer.Option(False, '-t', '--show-tags')
     ) -> None:
@@ -213,7 +227,7 @@ def _remove(board, card_id, board_name):
 
 @app.command()
 def remove(
-    board_name: str = typer.Option('default', '-n'),
+    board_name: str = typer.Option(default_board_name, '-n'),
     card_id: int = typer.Argument(...),
     force: bool = typer.Option(
         False,
@@ -244,7 +258,7 @@ def remove(
 
 @app.command(name="clear")
 def remove_all(
-    board_name: str = typer.Option('default', '-n'),
+    board_name: str = typer.Option(default_board_name, '-n'),
     force: bool = typer.Option(
         ...,
         prompt=f"Delete all cards from board?",
