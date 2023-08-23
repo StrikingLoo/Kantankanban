@@ -4,6 +4,27 @@ A Kanban CLI tool. Create boards, add cards to them or remove them.
 
 Built in Python using Typer, it stores cards as JSON data, trivially exportable and usable in other platforms if desired.
 
+### Example workflow
+
+If it's your first time using Kantankanban run 
+
+`./setup.sh`
+
+to install all dependencies.
+
+```bash
+./ktkb use to-do
+./ktkb init # assuming the board did not exist before
+./ktkb add 'Walk the dog'
+./ktkb add 'Feed the cat'
+./ktkb list # see all tasks
+./ktkb init -n done
+./ktkb mv 0 --from 'to-do' --to done # Mark a task as done
+```
+
+You can also add `./ktkb` to `bin` directory so it can be run from anywhere:
+`cp ./ktkb /usr/local/bin/`
+
 ## How to Use 🚀
 
 🌱 Create a new board:
@@ -58,18 +79,6 @@ After using this command, all subsequent commands that take a -n $BOARD_NAME wil
 
 The `./ktkb` command in this repo acts as an alias for `python -m kantankanban`, to reduce verbosity. It makes the user experience much more comfortable. E.g.: `./ktkb add 'red' -n colors`
 
-### Example workflow
-
-```bash
-./ktkb use to-do
-./ktkb init # assuming the board did not exist before
-./ktkb add 'Walk the dog'
-./ktkb add 'Feed the cat'
-./ktkb list # see all tasks
-./ktkb init -n done
-./ktkb mv 0 --from 'to-do' --to done # Mark a task as done
-```
-
 ### Advanced Feature: Tags
 
 Just like Trello and other similar software, this program supports tags (/labels) in cards.
@@ -118,9 +127,6 @@ Activate environment:
 
 Run tests:
 `python -m pytest tests`
-
-Add `./ktkb` to `bin` directory so it can be run from anywhere:
-`cp ./ktkb /usr/local/bin/`
 
 Initial code and project structure inspired by [RealPython.com](https://realpython.com/python-typer-cli/).
 
