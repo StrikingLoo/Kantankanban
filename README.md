@@ -119,6 +119,9 @@ Activate environment:
 Run tests:
 `python -m pytest tests`
 
+Add `./ktkb` to `bin` directory so it can be run from anywhere:
+`cp ./ktkb /usr/local/bin/`
+
 Initial code and project structure inspired by [RealPython.com](https://realpython.com/python-typer-cli/).
 
 See other projects by me on my [blog](https://strikingloo.github.io/blog/).
