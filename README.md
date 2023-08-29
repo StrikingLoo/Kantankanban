@@ -10,7 +10,7 @@ If it's your first time using Kantankanban run
 
 `./setup.sh`
 
-to install all dependencies.
+to install all dependencies and set the `KTKB_PATH` env variable.
 
 ```bash
 ./ktkb use to-do

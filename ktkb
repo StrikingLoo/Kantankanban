@@ -1,9 +1,10 @@
 #!/bin/bash
 
 # Activate the virtual environment
-source venv/bin/activate
+source $KTKB_PATH/venv/bin/activate
 
 # Change this to the correct path of your Python main module
+cd $KTKB_PATH
 PYTHON_MODULE="kantankanban"
 
 # Run the Python module
