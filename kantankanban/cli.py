@@ -249,7 +249,8 @@ def remove(
             typer.secho("Card index out of bounds.", fg=colors['ERROR'])
             raise typer.Exit(1)
         delete = typer.confirm(
-            f"Delete card #{card_id}: \"{card['Title']}\" from board {board_name}?"
+            f"Delete card #{card_id}: \"{card['Title']}\" from board {board_name}?",
+            default=True
         )
         if delete:
             _remove(board, card_id, board_name)
