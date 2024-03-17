@@ -8,4 +8,4 @@ cd $KTKB_PATH
 PYTHON_MODULE="kantankanban"
 
 # Run the Python module
-python -m $PYTHON_MODULE "$@"
+python3 -m $PYTHON_MODULE "$@"
