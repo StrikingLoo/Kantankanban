@@ -154,6 +154,7 @@ def mv(
         )
 
 @app.command(name="list")
+@app.command(name="ls")
 def list_all(board_name: str = typer.Option(default_board_name, '-n'),
     show_date: int = typer.Option(0, '-d', '--show-date'),
     show_tags: bool = typer.Option(False, '-t', '--show-tags')
@@ -225,8 +226,9 @@ def _remove(board, card_id, board_name):
             fg=colors['SUCCESS'],
         )
 
+@app.command('remove')
 @app.command()
-def remove(
+def rm(
     board_name: str = typer.Option(default_board_name, '-n'),
     card_id: int = typer.Argument(...),
     force: bool = typer.Option(
