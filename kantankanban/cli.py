@@ -230,34 +230,54 @@ def _remove(board, card_id, board_name):
 @app.command()
 def rm(
     board_name: str = typer.Option(default_board_name, '-n'),
-    card_id: int = typer.Argument(...),
+    card_id: Annotated[Optional[int], typer.Argument(...)] = None,
     force: bool = typer.Option(
         False,
         "--force",
         "-f",
         help="Force deletion without confirmation.",
     ),
+    matching: str = typer.Option(None, '-m', help='if present, removes all cards from board matching expression -simple string grep-.'),
 ) -> None:
     """Remove a card using its ID."""
     board = get_kanban(board_name)
 
-    if force:
-        _remove(board, card_id, board_name)
-    else:
+    if matching:
         card_list = board.get_card_list()
-        try:
-            card = card_list[card_id]
-        except IndexError:
-            typer.secho("Card index out of bounds.", fg=colors['ERROR'])
-            raise typer.Exit(1)
-        delete = typer.confirm(
-            f"Delete card #{card_id}: \"{card['Title']}\" from board {board_name}?",
-            default=True
-        )
-        if delete:
+        offset = 0
+        for card_id, card in enumerate(card_list):
+            if card['Title'].find(matching) != -1:
+                if force:
+                    _remove(board, card_id - offset, board_name)
+                    offset += 1
+                else:
+                    delete = typer.confirm(
+                        f"Delete card #{card_id}: \"{card['Title']}\" from board {board_name}?",
+                        default=True
+                    )
+                    if delete:
+                        _remove(board, card_id - offset, board_name)
+                        offset += 1
+                    else:
+                        typer.echo("Moving on.")
+    else:
+        if force:
             _remove(board, card_id, board_name)
         else:
-            typer.echo("Operation canceled")
+            card_list = board.get_card_list()
+            try:
+                card = card_list[card_id]
+            except IndexError:
+                typer.secho("Card index out of bounds.", fg=colors['ERROR'])
+                raise typer.Exit(1)
+            delete = typer.confirm(
+                f"Delete card #{card_id}: \"{card['Title']}\" from board {board_name}?",
+                default=True
+            )
+            if delete:
+                _remove(board, card_id, board_name)
+            else:
+                typer.echo("Operation canceled")
 
 @app.command(name="clear")
 def remove_all(
