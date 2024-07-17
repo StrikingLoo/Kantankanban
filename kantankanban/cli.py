@@ -237,7 +237,12 @@ def rm(
         help="Force deletion without confirmation.",
     ),
     matching: str = typer.Option(None, '-m', help='if present, removes all cards from board matching expression -simple string grep-.'),
-    card_id: Annotated[Optional[int], typer.Argument(None)] = None
+    card_id: Optional[int] = typer.Option(
+        None,
+        "--card-id",
+        "-c",
+        help="id of card to be deleted.",
+    )
 ) -> None:
     """Remove a card using its ID."""
     board = get_kanban(board_name)
