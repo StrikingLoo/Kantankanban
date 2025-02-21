@@ -91,6 +91,27 @@ def use(
         )
 
 @app.command()
+def done(
+    card_id: Annotated[int, typer.Argument(min=0, default=-1)] = typer.Argument(min=0, default=-1),
+    board_name: str = typer.Option(default_board_name, '-n'),
+) -> None:
+    board = get_kanban(board_name)
+    card_list = board.get_card_list()
+    try:
+        card = card_list[card_id]
+    except IndexError:
+        typer.secho("Card index out of bounds.", fg=colors['ERROR'])
+        raise typer.Exit(1)
+    delete = typer.confirm(
+        f"Delete card #{card_id}: \"{card['Title']}\" from board {board_name}?",
+        default=True
+    )
+    if delete:
+        _remove(board, card_id, board_name)
+    else:
+        typer.echo("Operation canceled")
+
+@app.command()
 def add(
     title: List[str] = typer.Argument(...),
     board_name: str = typer.Option(default_board_name, '-n'),
